@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Lint
+        run: uv run ruff check app scripts tests dashboard
+
+      - name: Format check
+        run: uv run black --check app scripts tests dashboard
+
+      - name: Run tests
+        run: uv run pytest -q
+
+  # docker-build:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
+
+  #     - name: Build API image
+  #       run: docker build -f docker/Dockerfile.api -t m5-api .
+
+  #     - name: Build dashboard image
+  #       run: docker build -f docker/Dockerfile.dashboard -t m5-dashboard .

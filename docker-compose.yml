@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: m5-api
+    ports:
+      - "8001:8001"
+    environment:
+      API_HOST: "0.0.0.0"
+      API_PORT: "8001"
+      DATABASE_URL: "sqlite:///artifacts/metadata.db"
+      MLFLOW_TRACKING_URI: "sqlite:///artifacts/mlflow.db"
+      UV_LINK_MODE: "copy"
+    command: uv run python -m scripts.run_api
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: m5-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      DATABASE_URL: "sqlite:///artifacts/metadata.db"
+      MLFLOW_TRACKING_URI: "sqlite:///artifacts/mlflow.db"
+      UV_LINK_MODE: "copy"
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+    command: uv run python -m scripts.run_dashboard
+    depends_on:
+      - api
